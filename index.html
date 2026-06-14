@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0A0E1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TCAP Audit">
+<link rel="manifest" href="manifest.json">
+<title>TCAP IA² — AUDIT</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0A0E1A;color:#E0D8F0;min-height:100vh;display:flex;flex-direction:column}
+.header{background:#0A0E1A;border-bottom:2px solid #C9A84C;padding:1rem;display:flex;align-items:center;gap:0.8rem;position:sticky;top:0;z-index:100}
+.header-title{font-size:1.1rem;font-weight:700;color:#FFF}
+.header-sub{font-size:0.65rem;color:#C9A84C;letter-spacing:1px}
+.chat-area{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.8rem}
+.msg-user{background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:12px 12px 0 12px;padding:0.8rem 1rem;align-self:flex-end;max-width:85%;font-size:0.9rem}
+.msg-bot{background:rgba(255,255,255,0.04);border:1px solid rgba(107,70,193,0.2);border-radius:12px 12px 12px 0;padding:0.8rem 1rem;align-self:flex-start;max-width:92%;font-size:0.88rem;line-height:1.6}
+.msg-bot .badge{display:inline-block;background:rgba(107,70,193,0.2);border:1px solid rgba(107,70,193,0.4);border-radius:20px;padding:0.2rem 0.6rem;font-size:0.65rem;color:#A78BFA;margin-bottom:0.5rem}
+.loading{display:flex;gap:4px;align-items:center;padding:0.5rem}
+.loading span{width:8px;height:8px;background:#C9A84C;border-radius:50%;animation:bounce 1.2s infinite}
+.loading span:nth-child(2){animation-delay:0.2s}
+.loading span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+.input-area{background:#0A0E1A;border-top:1px solid rgba(201,168,76,0.2);padding:0.8rem;position:sticky;bottom:0}
+.input-row{display:flex;gap:0.5rem;align-items:flex-end}
+.input-text{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:0.7rem 1rem;color:#E0D8F0;font-size:0.9rem;resize:none;outline:none;max-height:120px;min-height:44px}
+.input-text::placeholder{color:#555}
+.btn-send{background:linear-gradient(135deg,#C9A84C,#B8960A);border:none;border-radius:10px;width:44px;height:44px;font-size:1.2rem;cursor:pointer;flex-shrink:0}
+.media-row{display:flex;gap:0.5rem;margin-top:0.5rem}
+.btn-media{background:rgba(255,255,255,0.05);border:1px solid rgba(107,70,193,0.25);border-radius:8px;color:#A078C0;padding:0.4rem 0.6rem;font-size:0.75rem;cursor:pointer;flex:1;display:flex;align-items:center;justify-content:center;gap:0.3rem}
+.btn-media:active{background:rgba(107,70,193,0.2)}
+.welcome{text-align:center;padding:2rem 1rem;background:linear-gradient(135deg,rgba(201,168,76,0.05),rgba(10,14,26,0.9));border-radius:16px;border:1px solid rgba(201,168,76,0.15);margin:1rem 0}
+.welcome-icon{font-size:3rem;margin-bottom:0.5rem}
+.welcome-name{font-size:1.3rem;font-weight:700;color:#FFF;margin-bottom:0.3rem}
+.welcome-dt{font-size:0.75rem;color:#C9A84C;margin-bottom:0.8rem}
+.welcome-text{font-size:0.82rem;color:#8899BB;line-height:1.7}
+.quick-btns{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:1rem}
+.quick-btn{background:rgba(107,70,193,0.08);border:1px solid rgba(107,70,193,0.2);border-radius:8px;color:#C8C0D8;padding:0.6rem;font-size:0.75rem;cursor:pointer}
+#audio-preview{margin-top:0.5rem;width:100%;border-radius:8px}
+.feedback-row{display:flex;gap:0.5rem;margin-top:0.5rem}
+.btn-fb{background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:0.3rem 0.8rem;color:#888;cursor:pointer;font-size:0.9rem}
+.btn-fb:hover{background:rgba(255,255,255,0.05)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="font-size:1.8rem">⚖️</div>
+  <div>
+    <div class="header-title">TCAP IA² — AUDIT</div>
+    <div class="header-sub">INTELIGÊNCIA JURÍDICA ESPECIALIZADA</div>
+  </div>
+</div>
+
+<div class="chat-area" id="chat">
+  <div class="welcome" id="welcome">
+    <div class="welcome-icon">⚖️</div>
+    <div class="welcome-name" id="saudacao">Olá, Dr. Paulo!</div>
+    <div class="welcome-dt" id="datetime"></div>
+    <div class="welcome-text">
+      Sou a <strong style="color:#E0D8F0">AUDIT</strong> — especializada em
+      <strong style="color:#E0D8F0">Direito do Trabalho</strong> e
+      <strong style="color:#E0D8F0">Direito Previdenciário</strong>.<br><br>
+      Quais são os processos prioritários para hoje?
+    </div>
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="enviarPergunta('Como entrar com ação de horas extras?')">⚖️ Horas Extras</button>
+      <button class="quick-btn" onclick="enviarPergunta('Requisitos para aposentadoria rural INSS')">🌾 Aposent. Rural</button>
+      <button class="quick-btn" onclick="enviarPergunta('Como reconhecer vínculo empregatício?')">🔗 Vínculo Empreg.</button>
+      <button class="quick-btn" onclick="enviarPergunta('Requisitos para auxílio doença INSS')">🏥 Auxílio Doença</button>
+    </div>
+  </div>
+</div>
+
+<div class="input-area">
+  <div class="input-row">
+    <textarea class="input-text" id="msg" placeholder="Digite sua pergunta jurídica..." rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviar()}"></textarea>
+    <button class="btn-send" onclick="enviar()">🚀</button>
+  </div>
+  <div class="media-row">
+    <button class="btn-media" onclick="document.getElementById('upload-pdf').click()">📎 PDF</button>
+    <button class="btn-media" onclick="document.getElementById('upload-foto').click()">🖼️ Foto</button>
+    <button class="btn-media" onclick="gravarAudio()">🎤 Gravar</button>
+    <button class="btn-media" onclick="document.getElementById('upload-audio').click()">🔊 Áudio</button>
+  </div>
+  <input type="file" id="upload-pdf" accept=".pdf" style="display:none" onchange="analisarPDF(this)">
+  <input type="file" id="upload-foto" accept="image/*" capture="environment" style="display:none" onchange="analisarFoto(this)">
+  <input type="file" id="upload-audio" accept="audio/*" style="display:none" onchange="analisarAudio(this)">
+  <audio id="audio-preview" controls style="display:none"></audio>
+</div>
+
+<script>
+// URL do sistema TCAP no Streamlit
+const TCAP_URL = "https://tcap-audit-adv-paulo.streamlit.app";
+
+// Data e hora
+function atualizarHora(){
+  const agora = new Date();
+  const h = agora.getHours();
+  const saudacao = h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  document.getElementById("saudacao").textContent = `${saudacao}, Dr. Paulo!`;
+  const data = agora.toLocaleDateString("pt-BR");
+  const hora = agora.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("datetime").textContent = `📅 ${data} — ${hora}`;
+}
+atualizarHora();
+setInterval(atualizarHora, 60000);
+
+// Service Worker
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
+
+// Chat
+const chat = document.getElementById("chat");
+const welcome = document.getElementById("welcome");
+
+function addMsg(texto, tipo){
+  if(welcome) welcome.style.display = "none";
+  const div = document.createElement("div");
+  div.className = tipo === "user" ? "msg-user" : "msg-bot";
+  if(tipo === "bot"){
+    div.innerHTML = `<span class="badge">⚛️ AUDIT — TCAP IA²</span><br>${texto}`;
+    // Feedback
+    const fb = document.createElement("div");
+    fb.className = "feedback-row";
+    fb.innerHTML = `<button class="btn-fb" onclick="feedback(this,'positivo')">👍</button><button class="btn-fb" onclick="feedback(this,'negativo')">👎</button>`;
+    div.appendChild(fb);
+  } else {
+    div.textContent = texto;
+  }
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addLoading(){
+  const div = document.createElement("div");
+  div.className = "msg-bot loading";
+  div.id = "loading";
+  div.innerHTML = "<span></span><span></span><span></span>";
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeLoading(){
+  const l = document.getElementById("loading");
+  if(l) l.remove();
+}
+
+async function chamarTCAP(pergunta){
+  // Por enquanto abre o Streamlit com a pergunta — depois integra API
+  addLoading();
+  await new Promise(r => setTimeout(r, 1500));
+  removeLoading();
+  addMsg(`Sua pergunta foi enviada para análise: "${pergunta}"\n\n⚠️ Para resposta completa, acesse o sistema completo abaixo.`, "bot");
+  
+  const btn = document.createElement("button");
+  btn.style.cssText = "background:#C9A84C;border:none;border-radius:8px;padding:0.6rem 1rem;color:#000;font-weight:700;cursor:pointer;margin-top:0.5rem;width:100%";
+  btn.textContent = "🚀 Abrir TCAP Completo";
+  btn.onclick = () => window.open(`${TCAP_URL}?q=${encodeURIComponent(pergunta)}`, "_blank");
+  chat.lastElementChild.appendChild(btn);
+}
+
+function enviar(){
+  const msg = document.getElementById("msg").value.trim();
+  if(!msg) return;
+  addMsg(msg, "user");
+  document.getElementById("msg").value = "";
+  chamarTCAP(msg);
+}
+
+function enviarPergunta(texto){
+  addMsg(texto, "user");
+  chamarTCAP(texto);
+}
+
+function feedback(btn, tipo){
+  btn.parentElement.innerHTML = tipo === "positivo" ? "✅ Obrigado!" : "🔄 Enviando para correção...";
+}
+
+// Gravar áudio direto
+let mediaRecorder, chunks = [];
+async function gravarAudio(){
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder = new MediaRecorder(stream);
+    chunks = [];
+    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, {type:"audio/webm"});
+      const url = URL.createObjectURL(blob);
+      const prev = document.getElementById("audio-preview");
+      prev.src = url;
+      prev.style.display = "block";
+      addMsg("🎤 Áudio gravado! Analisando...", "user");
+      chamarTCAP("Transcreva e analise juridicamente este áudio");
+    };
+    mediaRecorder.start();
+    
+    // Para após 60 segundos ou quando clicar novamente
+    const btnGravar = event.target;
+    btnGravar.textContent = "⏹️ Parar";
+    btnGravar.style.background = "rgba(255,50,50,0.2)";
+    btnGravar.onclick = () => {
+      mediaRecorder.stop();
+      stream.getTracks().forEach(t => t.stop());
+      btnGravar.textContent = "🎤 Gravar";
+      btnGravar.style.background = "";
+      btnGravar.onclick = gravarAudio;
+    };
+  } catch(e) {
+    alert("Permita o acesso ao microfone nas configurações do navegador.");
+  }
+}
+
+function analisarPDF(input){
+  if(!input.files[0]) return;
+  addMsg(`📎 PDF enviado: ${input.files[0].name}`, "user");
+  chamarTCAP(`Analise juridicamente o documento: ${input.files[0].name}`);
+}
+
+function analisarFoto(input){
+  if(!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    addMsg(`🖼️ Imagem enviada para análise`, "user");
+    chamarTCAP("Analise juridicamente esta imagem/documento");
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function analisarAudio(input){
+  if(!input.files[0]) return;
+  addMsg(`🔊 Áudio enviado: ${input.files[0].name}`, "user");
+  chamarTCAP("Transcreva e analise juridicamente este áudio");
+}
+</script>
+</body>
+</html>
